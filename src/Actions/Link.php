@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use function Laravel\Prompts\info;
@@ -8,33 +10,35 @@ use function Laravel\Prompts\warning;
 use App\Actions\UnLink;
 use App\Actions\ProcessHook;
 
+use App\Worktree;
+
 class Link
 {
-  public static function run(string $worktree_path): void
+  public static function run(Worktree $worktree): void
   {
-    if (!is_dir($worktree_path)) {
-      throw new \Exception("The path {$worktree_path} is not a directory");
-    }
-
     $cwd = getcwd();
+
+    if (!$cwd) {
+      throw new \Exception('Could not get current working directory');
+    }
 
     $current = $cwd . '/current';
 
-    ProcessHook::run(ProcessHook::HOOK_BEFORE_CHANGE_LOCAL, $worktree_path);
-    ProcessHook::run(ProcessHook::HOOK_BEFORE_CHANGE_GLOBAL, $cwd);
+    ProcessHook::run(ProcessHook::HOOK_BEFORE_CHANGE_LOCAL, $worktree->path);
+    ProcessHook::run(ProcessHook::HOOK_BEFORE_CHANGE_GLOBAL, $worktree->path);
 
     if (is_link($current)) {
       warning('Removing old symlink: ' . readlink($current));
-      UnLink::run();
+      UnLinkCurrent::run();
     }
 
-    if (!symlink($worktree_path, $current)) {
+    if (!symlink($worktree->path, $current)) {
       throw new \Exception('Could not create symlink');
     }
 
-    info('Switched to worktree: ' . $worktree_path);
+    info('Switched to worktree: ' . $worktree->path);
 
-    ProcessHook::run(ProcessHook::HOOK_AFTER_CHANGE_LOCAL, $worktree_path);
+    ProcessHook::run(ProcessHook::HOOK_AFTER_CHANGE_LOCAL, $worktree->path);
     ProcessHook::run(ProcessHook::HOOK_AFTER_CHANGE_GLOBAL, $cwd);
   }
 }

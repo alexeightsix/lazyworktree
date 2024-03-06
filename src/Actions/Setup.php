@@ -1,42 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
+use App\GitService;
+use App\Helpers;
+use Laravel\Prompts\Spinner;
+
+use function Laravel\Prompts\error;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\spin;
 
 class Setup
 {
-  public static function run() : void
+  public static function run(): void
   {
     $git_repo = text(
       label: 'Git Repository URL',
       placeholder: 'https://github.com/laravel/framework.git',
+      default: 'https://github.com/alexeightsix/nvim-config.git',
       hint: 'The URL of the git repository to clone.',
-      default: 'https://github.com/laravel/framework.git',
       validate: fn (string $value) => match (true) {
         empty($value) => 'The URL cannot be empty.',
         default => null
       }
     );
 
-    $folder = text(
-      label: 'Folder Name',
-      placeholder: 'laravel-framework',
-      hint: 'The folder to clone the bare git repository into.',
-      default: 'laravel-framework',
-      validate: fn (string $value) => match (true) {
-        empty($value) => 'The folder cannot be empty.',
-        !preg_match('/^([a-zA-Z0-9_-])+$/', $value) => 'The folder name must be valid.',
-        is_dir($value) => 'The folder already exists.',
-        default => null
-      }
-    );
+    if (!GitService::repoExists($git_repo)) {
+      error('The repository does not exist.');
+      exit(1);
+    }
 
-    spin(
-      fn () => shell_exec("git clone {$git_repo} {$folder} --bare > /dev/null 2>&1"),
-      'Cloning Repository'
-    );
+    $folder = "git";
+
+    if (is_dir($folder)) {
+      error("The folder {$folder} already exists.");
+      exit(1);
+    }
+
+    GitService::bareClone($git_repo, $folder);
 
     $myfile = fopen(getcwd() . '/lazywt.json', "w");
 

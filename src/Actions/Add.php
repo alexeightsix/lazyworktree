@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use function Laravel\Prompts\confirm;
@@ -13,7 +15,7 @@ class Add
 {
   const MENU_NAME = 'Add Worktree';
 
-  public static function fromExisting(string $git_root) : void
+  public static function fromExisting(string $git_root): void
   {
     $branches = GitService::getBranches($git_root);
 
@@ -33,7 +35,7 @@ class Add
     GitService::addWorktree($git_root, $branch);
   }
 
-  public static function fromNew(string $git_root) : void
+  public static function fromNew(string $git_root): void
   {
     $branch = text(
       label: 'Enter the name of the new branch',
@@ -45,12 +47,20 @@ class Add
 
     $branch = (string) Helpers::slugify($branch);
 
-    $worktree_dir = GitService::addWorktree($git_root, $branch, true);
+    GitService::addWorktree($git_root, $branch, true);
 
-    $switch = confirm('Do you want to switch to this branch?', true);
+    $worktree = GitService::getWorktrees($git_root, $branch);
+
+    $worktree = $worktree->where('baseName', $branch);
+
+    if (!$worktree) {
+      throw new \Exception("Failed to add worktree.");
+    }
+
+    $switch = confirm('Do you want to switch to this Worktree?', true);
 
     if ($switch) {
-      Link::run($worktree_dir);
+      Link::run($worktree);
     }
   }
 

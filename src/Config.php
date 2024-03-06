@@ -16,11 +16,11 @@ class Config
       throw new Exception("Unable to read lazywt.json.");
     }
 
-    if (!json_validate($contents)) {
-      throw new Exception("Invalid JSON in lazywt.json.");
-    }
-
-    return json_decode($contents, true);
+    return (array) json_decode(
+      json: $contents,
+      associative: true,
+      flags: JSON_THROW_ON_ERROR
+    );
   }
 
   public static function has(string $key): bool

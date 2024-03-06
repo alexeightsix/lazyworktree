@@ -10,6 +10,7 @@ use App\Actions\Add;
 use App\Actions\Change;
 use App\Actions\Delete;
 use App\Actions\Quit;
+use App\Actions\Link;
 use App\Actions\Setup;
 
 use Exception;
@@ -24,6 +25,10 @@ class CLIApplication
   private array $menuItems = [];
 
   private const OPT_INIT = 'init';
+  private const OPT_SWITCH = 'switch';
+
+  private const API_ACTION_SWITCH = "switch";
+  private const API_ACTION_LIST = "list";
 
   public function __construct(array $options)
   {
@@ -45,7 +50,43 @@ class CLIApplication
     $this->menuItems[$action] = $action::MENU_NAME;
   }
 
-  public function run() : int
+  private function handleApi(): void
+  {
+    $api_action = $this->options[2] ?? null;
+
+    if (!in_array($api_action, [self::API_ACTION_SWITCH, self::API_ACTION_LIST])) {
+      error('Invalid API action.');
+      exit(1);
+    }
+
+    $worktrees = GitService::getWorktrees(git_path: Config::get('git_folder'));
+
+    if ($api_action === self::API_ACTION_LIST) {
+      echo $worktrees->getJson();
+      exit(0);
+    }
+
+    if ($api_action === self::API_ACTION_SWITCH) {
+      $option = $this->options[3] ?? null;
+
+      if ($option === null) {
+        error('No worktree specified.');
+        exit(1);
+      }
+
+      $worktree = $worktrees->where("baseName", $option);
+
+      if (!$worktree) {
+        error('Worktree not found.');
+        exit(1);
+      }
+
+      Link::run($worktree);
+      exit(0);
+    }
+  }
+
+  public function run(): int
   {
     $initalized = $this->isInitalized();
     $init = $this->hasOption(self::OPT_INIT);
@@ -53,7 +94,30 @@ class CLIApplication
     if (!$init && !$initalized) {
       error('No lazywt.json file found. Please run `lazywt init` in the root of your project.');
       exit(1);
-    } else if ($init && !$initalized) {
+    }
+
+    if ($this->hasOption("api")) {
+      $this->handleApi();
+      exit(0);
+    }
+
+    foreach (["add", "switch", "delete"] as $option) {
+      if ($this->hasOption($option)) {
+        match ($option) {
+          "add" => Add::run(),
+          "switch" => Change::run(),
+          "delete" => Delete::run(),
+        };
+        exit(0);
+      }
+    }
+
+    if ($this->hasOption("add") || $this->hasOption("switch")) {
+      Add::run();
+      exit(0);
+    }
+
+    if ($init && !$initalized) {
       Setup::run();
     } else if ($init && $initalized) {
       error('A lazywt.json file already exists. Please remove it before running `lazywt init`.');
@@ -69,7 +133,7 @@ class CLIApplication
 
     $worktrees = GitService::getWorktrees($git_root);
 
-    if (empty($worktrees)) {
+    if ($worktrees->isEmpty()) {
       warning('Add your first worktree.');
       Add::run();
       exit(0);
@@ -84,7 +148,7 @@ class CLIApplication
 
     $this->registerMenuItem(Quit::class);
 
-    if ($this->hasOption('switch')) {
+    if ($this->hasOption(self::OPT_SWITCH)) {
       if (empty($worktrees)) {
         error('No worktrees to switch to. Add a worktree first.');
         exit(1);

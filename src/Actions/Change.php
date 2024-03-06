@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
-use function Laravel\Prompts\text;
-use function Laravel\Prompts\spin;
 use function Laravel\Prompts\select;
 use App\GitService;
 use App\Config;
+use App\Worktree;
 
 class Change
 {
@@ -16,19 +17,20 @@ class Change
   {
     $git_root = Config::get('git_folder');
 
-    $list = GitService::getWorktrees($git_root);
+    $worktrees = GitService::getWorktrees($git_root);
 
-    foreach ($list as $value) {
-      $options[$value["path"]] = $value["branch"];
-    }
-
-    if (empty($options)) {
+    if ($worktrees->isEmpty()) {
       throw new \Exception("No worktrees found.");
     }
 
-    $path = (string) select('Select a worktree to switch to', $options);
-    
-    Link::run($path);
+    foreach ($worktrees->get() as $worktree) {
+      $options[$worktree->path] = $worktree->baseName;
+    }
 
+    $path = (string) select('Select a worktree to switch to', $options);
+
+    $worktree = $worktrees->where('path', $path);
+
+    Link::run($worktree);
   }
 }

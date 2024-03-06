@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
-class UnLink
+class UnLinkCurrent
 {
   public static function run(): void
   {

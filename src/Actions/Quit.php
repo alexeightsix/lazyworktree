@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Actions;
+declare(strict_types=1);
 
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\warning;
+namespace App\Actions;
 
 class Quit
 {

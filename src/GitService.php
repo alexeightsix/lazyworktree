@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Worktrees;
+
 class GitService
 {
-  // FIX ME: make use of this when adding
-  public static function exists(string $url): bool
+  public static function repoExists(string $url): bool
   {
-    $command = "git ls-remote {$url} 2> /dev/null";
-    return shell_exec($command) !== null;
+    $command = "git ls-remote {$url}";
+    [$ok] = Helpers::shell_exec($command);
+    return $ok;
+  }
+
+  public static function isValidUrl(string $url): bool
+  {
+    $re = '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/m';
+    $matches = null;
+    preg_match($re, $url, $matches, PREG_SET_ORDER, 0);
+    return !empty($matches);
   }
 
   public static function deleteWorktree(string $git_path, string $worktree_path): void
@@ -24,23 +34,12 @@ class GitService
 
     if (isset($error) || is_dir($worktree_path)) {
       throw new GitOperationException("Failed to delete worktree.");
+    } elseif (is_link($worktree_path) && unlink($worktree_path)) {
+      throw new \Exception("Failed to delete worktree symlink.");
     }
   }
 
-  private static function parseBranchName(string $name): string|bool
-  {
-    $re = '/^\[(.*)\]$/m';
-    $matches = [];
-    preg_match($re, $name, $matches);
-
-    if (empty($matches) || count($matches) != 2) {
-      return false;
-    }
-
-    return (string) $matches[1];
-  }
-
-  public static function addWorktree(string $git_root, string $branch, bool $newBanch = false): string
+  public static function addWorktree(string $git_root, string $branch, bool $newBanch = false): bool
   {
     if ($newBanch) {
       $args = "-b {$branch}";
@@ -56,37 +55,29 @@ class GitService
     $worktree_dir = "../worktrees/$slug";
     $cmd = "git -C $git_root worktree add {$worktree_dir} $args";
 
-    $output = shell_exec($cmd);
+    [$ok] = Helpers::shell_exec($cmd);
 
-    if ($output === null) {
+    if (!$ok) {
       throw new GitOperationException("Failed to add worktree.");
     }
 
-    return getcwd() . "/worktrees/{$slug}";
+    return true;
   }
 
   public static function isWorktree(string $path, string $branch): bool
   {
-    $worktrees = self::getWorktrees($path);
-
-    foreach ($worktrees as $worktree) {
-      if ($worktree["branch"] === $branch) {
-        return true;
-      }
-    }
-
-    return false;
+    $worktrees = self::getWorktrees(git_path: $path);
+    return $worktrees->exists($branch);
   }
 
-  public static function getBranches(string $path) : array
+  public static function getBranches(string $path): array
   {
-    $output = shell_exec("git -C {$path} branch -a");
+    [$ok, $output] = Helpers::shell_exec("git -C {$path} branch -a");
 
-    if ($output === null) {
+    if (!$ok || !isset($output)) {
       throw new GitOperationException("Failed to list branches.");
     }
 
-    $output = explode("\n", (string) $output);
     $output = array_filter($output);
 
     if (empty($output)) {
@@ -95,64 +86,58 @@ class GitService
 
     $output = array_map(function ($branch): string {
       $branch = str_replace("*", "", $branch);
+      $branch = str_replace("+", "", $branch);
       $branch = trim($branch);
       return $branch;
     }, $output);
 
+    sort($output);
 
     return (array) $output;
   }
 
   public static function gitWorktreePrune(string $path): void
   {
-    shell_exec("git -C {$path} worktree prune");
+    [$ok] = Helpers::shell_exec("git -C {$path} worktree prune");
+
+    if (!$ok) {
+      throw new GitOperationException("Failed to prune worktrees.");
+    }
   }
 
-  public static function getWorktrees(string $path): array
+  public static function getWorktrees(string $git_path): Worktrees
   {
-    $ls = shell_exec("git -C {$path} worktree list");
+    [$ok, $worktrees] = Helpers::shell_exec("git -C {$git_path} worktree list --porcelain");
 
-    if ($ls === null) {
+    if (!$ok || !$worktrees) {
       throw new GitOperationException("Failed to list worktrees.");
     }
 
-    $ls = explode("\n", (string) $ls);
+    $current = 0;
+    $trees = [];
 
-    $list = [];
-
-    foreach ($ls as $worktree) {
-      $worktree = array_values(array_filter(explode(" ", $worktree)));
-
-      if (empty($worktree[0])) {
-        break;
+    foreach ($worktrees as $worktree) {
+      if (empty($worktree)) {
+        $current = $current + 1;
+        continue;
       }
-
-      if (is_dir($worktree[0]) === false) {
-        throw new GitOperationException("Error Parsing Worktree List.");
-      }
-
-      $out = [
-        "path" => $worktree[0],
-        "branch" => null,
-      ];
-
-      foreach ($worktree as $key => $value) {
-        if ($out["branch"] = self::parseBranchName($value)) {
-          $list[] = $out;
-          break;
-        }
-      }
+      $trees[$current][] = $worktree;
     }
+
+    $list = new Worktrees();
+
+    foreach ($trees as $tree) {
+      $list->addWorktree(new Worktree($tree));
+    }
+
     return $list;
   }
 
   public static function bareClone(string $url, string $folder): void
   {
-    $command = "git clone {$url} {$folder} --bare > /dev/null 2>&1";
+    [$ok] = Helpers::shell_exec("git clone {$url} {$folder} --bare > /dev/null 2>&1");
 
-    $out = shell_exec($command);
-
-    if ($out === null) {
+    if (!$ok) {
       throw new GitOperationException("Failed to clone repository.");
     }
   }
