@@ -1,0 +1,18 @@
+{
+    "autoload": {
+        "psr-4": { 
+          "App\\": "src/" 
+        }
+    },
+    "require": {
+        "laravel/prompts": "^0.1.16"
+    },
+    "require-dev": {
+      "psy/psysh": "@stable",
+      "friendsofphp/php-cs-fixer": "^3.51",
+      "phpstan/phpstan": "^1.10"
+    },
+    "platform": {
+        "php": ">=8.3"
+    }
+}

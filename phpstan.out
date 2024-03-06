@@ -1,0 +1,51 @@
+ ------ ------------------------------------------------------------------------------------------------------- 
+  Line   Actions/Link.php                                                                                       
+ ------ ------------------------------------------------------------------------------------------------------- 
+  24     Parameter #2 $cwd of static method App\Actions\ProcessHook::run() expects string, string|false given.  
+  38     Parameter #2 $cwd of static method App\Actions\ProcessHook::run() expects string, string|false given.  
+ ------ ------------------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------------------------------------------------- 
+  Line   CLIApplication.php                                                                                                    
+ ------ ---------------------------------------------------------------------------------------------------------------------- 
+  23     Property App\CLIApplication::$options type has no value type specified in iterable type array.                        
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type                             
+  24     Property App\CLIApplication::$menuItems type has no value type specified in iterable type array.                      
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type                             
+  28     Method App\CLIApplication::__construct() has parameter $options with no value type specified in iterable type array.  
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type                             
+  45     Cannot access constant MENU_NAME on mixed.                                                                            
+  80     Variable $worktrees in empty() always exists and is not falsy.                                                        
+  88     Variable $worktrees in empty() always exists and is not falsy.                                                        
+  100    Cannot call static method run() on int|string.                                                                        
+ ------ ---------------------------------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------- 
+  Line   Config.php                                                                                         
+ ------ --------------------------------------------------------------------------------------------------- 
+  11     Method App\Config::decodeConfig() return type has no value type specified in iterable type array.  
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type          
+  23     Method App\Config::decodeConfig() should return array but returns mixed.                           
+ ------ --------------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------------------- 
+  Line   GitService.php                                                                                         
+ ------ ------------------------------------------------------------------------------------------------------- 
+  81     Method App\GitService::getBranches() return type has no value type specified in iterable type array.   
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type              
+  111    Method App\GitService::getWorktrees() return type has no value type specified in iterable type array.  
+         💡 See: https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type              
+ ------ ------------------------------------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------------------- 
+  Line   Helpers.php                                                                              
+ ------ ----------------------------------------------------------------------------------------- 
+  17     Cannot call method isDir() on mixed.                                                     
+  18     Cannot call method getRealPath() on mixed.                                               
+  27     Parameter #3 $subject of function preg_replace expects array|string, string|null given.  
+  28     Parameter #1 $string of function trim expects string, string|null given.                 
+  30     Parameter #1 $string of function strtolower expects string, string|null given.           
+ ------ ----------------------------------------------------------------------------------------- 
+
+ [ERROR] Found 18 errors                                                                                                
+
