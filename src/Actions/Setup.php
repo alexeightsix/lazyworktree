@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\GitService;
-use App\Helpers;
-use Laravel\Prompts\Spinner;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\text;
-use function Laravel\Prompts\spin;
 
 class Setup
 {
@@ -19,7 +16,6 @@ class Setup
     $git_repo = text(
       label: 'Git Repository URL',
       placeholder: 'https://github.com/laravel/framework.git',
-      default: 'https://github.com/alexeightsix/nvim-config.git',
       hint: 'The URL of the git repository to clone.',
       validate: fn (string $value) => match (true) {
         empty($value) => 'The URL cannot be empty.',

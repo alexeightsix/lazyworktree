@@ -8,11 +8,11 @@ class Worktree
 {
   protected array $worktree;
 
-  private ?bool $bare;
-  private ?string $baseName;
-  private ?string $branch;
-  private ?string $head;
-  private ?string $path;
+  public ?bool $bare;
+  public ?string $baseName;
+  public ?string $branch;
+  public ?string $head;
+  public ?string $path;
 
   public function __construct(array $worktree)
   {
@@ -72,7 +72,7 @@ class Worktree
 
   public function isBare(): bool
   {
-    return $this->bare;
+    return $this->bare !== null && $this->bare === true;
   }
 
   private function setBranch(): void
@@ -84,6 +84,10 @@ class Worktree
 
   private function setBaseName(): void
   {
+    if ($this->path === null) {
+      throw new \Exception("Path is not set.");
+    }
+
     $this->baseName = basename($this->path);
   }
 

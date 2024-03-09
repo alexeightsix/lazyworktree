@@ -16,7 +16,7 @@ class Worktrees
   public function exists(string $baseName): bool
   {
     foreach ($this->worktrees as $worktree) {
-      if ($worktree->getBaseName() === $baseName) {
+      if ($worktree->baseName === $baseName) {
         return true;
       }
     }
@@ -54,10 +54,12 @@ class Worktrees
 
   public function getJson(): string
   {
+    $worktrees = [];
+
     foreach ($this->worktrees as $worktree) {
       $worktrees[] = $worktree->get();
     }
 
-    return json_encode($worktrees);
+    return json_encode($worktrees, JSON_THROW_ON_ERROR);
   }
 }

@@ -7,7 +7,6 @@ namespace App\Actions;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\info;
 
-use App\Actions\UnLink;
 use App\Config;
 use App\GitService;
 
@@ -18,26 +17,32 @@ class Delete
   public static function run(): void
   {
     $git_root = Config::get('git_folder');
-    $worktrees = GitService::getWorktrees($git_root);
+    $worktrees = GitService::getWorktrees(git_path: $git_root);
 
     if ($worktrees->isEmpty()) {
       throw new \Exception("No worktrees found.");
     }
 
+    $options = [];
+
     foreach ($worktrees->get() as $worktree) {
       $options[$worktree->path] = $worktree->baseName;
     }
 
-    $path = (string) select('Select a worktree to delete', $options);
+    $path = (string) select(
+      label: 'Select a worktree to delete',
+      options: $options
+    );
 
-    // FIX ME: handle better (symlink, last one you're deleting etc)
+    ProcessHook::run(ProcessHook::HOOK_BEFORE_DELETE_LOCAL, $path);
+    ProcessHook::run(ProcessHook::HOOK_BEFORE_DELETE_GLOBAL, $path);
+
     GitService::deleteWorktree($git_root, $path);
 
     $worktrees = GitService::getWorktrees($git_root);
 
-    if (empty($worktrees)) {
-      UnLinkCurrent::run();
-    }
+    ProcessHook::run(ProcessHook::HOOK_AFTER_DELETE_LOCAL, $path);
+    ProcessHook::run(ProcessHook::HOOK_AFTER_DELETE_GLOBAL, $path);
 
     info("Worktree $options[$path] [{$path}] deleted");
   }

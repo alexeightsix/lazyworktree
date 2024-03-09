@@ -47,7 +47,7 @@ class CLIApplication
 
   private function registerMenuItem(mixed $action): void
   {
-    $this->menuItems[$action] = $action::MENU_NAME;
+    $this->menuItems[$action] = $action::MENU_NAME; // @phpstan-ignore-line
   }
 
   private function handleApi(): void
@@ -133,23 +133,8 @@ class CLIApplication
 
     $worktrees = GitService::getWorktrees($git_root);
 
-    if ($worktrees->isEmpty()) {
-      warning('Add your first worktree.');
-      Add::run();
-      exit(0);
-    }
-
-    $this->registerMenuItem(Add::class);
-
-    if (!empty($worktrees)) {
-      $this->registerMenuItem(Change::class);
-      $this->registerMenuItem(Delete::class);
-    }
-
-    $this->registerMenuItem(Quit::class);
-
     if ($this->hasOption(self::OPT_SWITCH)) {
-      if (empty($worktrees)) {
+      if ($worktrees->isEmpty()) {
         error('No worktrees to switch to. Add a worktree first.');
         exit(1);
       }
@@ -158,10 +143,23 @@ class CLIApplication
       exit(0);
     }
 
-    $option = select('Select Action', $this->menuItems);
+    if ($worktrees->isEmpty()) {
+      warning('Add your first worktree.');
+      Add::run();
+      exit(0);
+    }
+
+    $this->registerMenuItem(Add::class);
+    $this->registerMenuItem(Change::class);
+    $this->registerMenuItem(Delete::class);
+    $this->registerMenuItem(Quit::class);
+
+
+
+    $option = select(label: 'Select Action', options: $this->menuItems);
 
     try {
-      $option::run();
+      $option::run(); // @phpstan-ignore-line
       exit(0);
     } catch (Exception $e) {
       error($e->getMessage());

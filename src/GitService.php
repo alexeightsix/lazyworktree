@@ -15,14 +15,6 @@ class GitService
     return $ok;
   }
 
-  public static function isValidUrl(string $url): bool
-  {
-    $re = '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/m';
-    $matches = null;
-    preg_match($re, $url, $matches, PREG_SET_ORDER, 0);
-    return !empty($matches);
-  }
-
   public static function deleteWorktree(string $git_path, string $worktree_path): void
   {
     try {
@@ -39,9 +31,9 @@ class GitService
     }
   }
 
-  public static function addWorktree(string $git_root, string $branch, bool $newBanch = false): bool
+  public static function addWorktree(string $git_root, string $branch, bool $newBranch = false): bool
   {
-    if ($newBanch) {
+    if ($newBranch) {
       $args = "-b {$branch}";
     } else {
       $args = $branch;
@@ -64,12 +56,6 @@ class GitService
     return true;
   }
 
-  public static function isWorktree(string $path, string $branch): bool
-  {
-    $worktrees = self::getWorktrees(git_path: $path);
-    return $worktrees->exists($branch);
-  }
-
   public static function getBranches(string $path): array
   {
     [$ok, $output] = Helpers::shell_exec("git -C {$path} branch -a");
@@ -84,16 +70,19 @@ class GitService
       throw new GitOperationException("Failed to list branches.");
     }
 
-    $output = array_map(function ($branch): string {
+    $branches = [];
+
+    foreach ($output as $branch) {
       $branch = str_replace("*", "", $branch);
       $branch = str_replace("+", "", $branch);
-      $branch = trim($branch);
-      return $branch;
-    }, $output);
+      $branches[] = $branch;
+    }
 
-    sort($output);
+    sort($branches);
 
-    return (array) $output;
+    $branches = array_map("trim", $branches); // @phpstan-ignore-line
+
+    return (array) $branches;
   }
 
   public static function gitWorktreePrune(string $path): void

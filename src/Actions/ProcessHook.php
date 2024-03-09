@@ -9,32 +9,44 @@ use function Laravel\Prompts\info;
 
 class ProcessHook
 {
-
-  const HOOK_BEFORE_CHANGE_LOCAL = 'hook_before_change_local';
-  const HOOK_BEFORE_CHANGE_GLOBAL = 'hook_before_change_global';
-  const HOOK_AFTER_CHANGE_LOCAL = 'hook_after_change_local';
-  const HOOK_AFTER_CHANGE_GLOBAL = 'hook_after_change_global';
+  const HOOK_BEFORE_CHANGE_LOCAL = 'HOOK_BEFORE_CHANGE_LOCAL';
+  const HOOK_BEFORE_CHANGE_GLOBAL = 'HOOK_BEFORE_CHANGE_GLOBAL';
+  const HOOK_AFTER_CHANGE_LOCAL = 'HOOK_AFTER_CHANGE_LOCAL';
+  const HOOK_AFTER_CHANGE_GLOBAL = 'HOOK_AFTER_CHANGE_GLOBAL';
+  const HOOK_BEFORE_DELETE_LOCAL = 'HOOK_BEFORE_DELETE_LOCAL';
+  const HOOK_BEFORE_DELETE_GLOBAL = 'HOOK_BEFORE_DELETE_GLOBAL';
+  const HOOK_AFTER_DELETE_LOCAL = 'HOOK_AFTER_DELETE_LOCAL';
+  const HOOK_AFTER_DELETE_GLOBAL = 'HOOK_AFTER_DELETE_GLOBAL';
+  const HOOK_BEFORE_ADD_LOCAL = 'HOOK_BEFORE_ADD_LOCAL';
+  const HOOK_BEFORE_ADD_GLOBAL = 'HOOK_BEFORE_ADD_GLOBAL';
 
   public static function run(string $hook, string $cwd): void
   {
-    $hooks = [
-      "hook_after_change_local" => "{$cwd}/after.sh",
-      "hook_after_change_global" => "{$cwd}/after.sh",
-      "hook_before_change_local" => "{$cwd}/before.sh",
-      "hook_before_change_global" => "{$cwd}/before.sh"
-    ];
+    $reflection = new \ReflectionClass(__CLASS__);
+    $hooks = $reflection->getConstants();
 
-    if (!array_key_exists($hook, $hooks)) {
+    if (!array_key_exists(key: $hook, array: $hooks)) {
       throw new \Exception("Hook {$hook} not found");
     }
 
-    if (file_exists($hooks[$hook])) {
-      if (!is_executable($hooks[$hook])) {
-        warning("Hook {$hook} is not executable, skipping");
-      } else {
-        info("Running hook: {$hook}");
-        shell_exec("/usr/bin/env bash {$hooks[$hook]}");
-      }
+    $hook_str = $hooks[$hook];
+
+    if (!is_string(value: $hook_str)) {
+      throw new \TypeError("Hook {$hook} is not a string");
     }
+
+    $hook = $cwd . "/" . strtolower(string: $hook_str) . ".sh";
+
+    if (!file_exists(filename: $hook)) {
+      return;
+    }
+
+    if (!is_executable(filename: $hook)) {
+      warning(message: "Hook {$hook} is not executable, skipping");
+      return;
+    }
+
+    info(message: "Running hook: {$hook}");
+    shell_exec(command: "/usr/bin/env bash {$hook_str}");
   }
 }
