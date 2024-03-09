@@ -14,15 +14,15 @@ A simple TUI to manage GIT Worktrees. It was written in PHP using the [Laravel P
 
 #### Installation
 ``` bash
-git clone git@github.com:alexeightsix/lazyworktree.git ~/.local/share/
+git clone git@github.com:alexeightsix/lazyworktree.git ~/.local/share/lazyworktree
 cd ~/.local/share/lazyworktree
-composer install
-sudo ln -s ~/.local/share/lazyworktree/lazyworktree /usr/local/bin/lazyworktree
+composer install --no-dev
+sudo ln -s ~/.local/share/lazyworktree/bin /usr/local/bin/lazyworktree
 ```
 
-#### Alias
+#### Shell Alias (eg: .bashrc, .zshrc)
 ``` bash
-export lw='/usr/local/bin/lazyworktree'
+export lw='lazyworktree'
 ```
 
 #### Usage
@@ -39,9 +39,8 @@ lazyworktree
 
 ### Shortcuts
 ``` bash
-lazyworktree create
+lazyworktree add
 lazyworktree delete
-lazyworktree list
 lazyworktree switch
 ```
 
@@ -52,7 +51,7 @@ A ```current``` folder will be created in the root directory of your project lin
 If you're creating a plugin for your IDE you can use the following commands to interact with the TUI
 ``` bash
 lazyworktree api list
-lazyworktree api switch
+lazyworktree api switch <baseName|path>
 ```
 
 ### Hooks 
