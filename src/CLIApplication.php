@@ -40,11 +40,6 @@ class CLIApplication
     return in_array($option, $this->options);
   }
 
-  private function isInitalized(): bool
-  {
-    return file_exists(getcwd() . '/lazywt.json');
-  }
-
   private function registerMenuItem(mixed $action): void
   {
     $this->menuItems[$action] = $action::MENU_NAME; // @phpstan-ignore-line
@@ -59,7 +54,9 @@ class CLIApplication
       exit(1);
     }
 
-    $worktrees = GitService::getWorktrees(git_path: Config::get('git_folder'));
+    $git_root = Helpers::findGitFolder();
+
+    $worktrees = GitService::getWorktrees(git_path: $git_root);
 
     if ($api_action === self::API_ACTION_LIST) {
       echo $worktrees->getJson();
@@ -88,10 +85,15 @@ class CLIApplication
 
   public function run(): int
   {
-    $initalized = $this->isInitalized();
+    try {
+      Helpers::getRoot();
+      $initalized = true;
+    } catch (\Exception $e) {
+    }
+
     $init = $this->hasOption(self::OPT_INIT);
 
-    if (!$init && !$initalized) {
+    if (!$init && !isset($initalized)) {
       error('No lazywt.json file found. Please run `lazywt init` in the root of your project.');
       exit(1);
     }
@@ -124,12 +126,7 @@ class CLIApplication
       exit(1);
     }
 
-    $git_root = Config::get('git_folder');
-
-    if (!is_dir($git_root)) {
-      error('The git folder does not exist.');
-      exit(1);
-    }
+    $git_root = Helpers::findGitFolder();
 
     $worktrees = GitService::getWorktrees($git_root);
 

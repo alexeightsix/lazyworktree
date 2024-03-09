@@ -10,7 +10,8 @@ class Config
 {
   public static function decodeConfig(): array
   {
-    $contents = file_get_contents(getcwd() . '/lazywt.json');
+    $root = Helpers::getRoot();
+    $contents = file_get_contents($root . '/lazywt.json');
 
     if ($contents === false) {
       throw new Exception("Unable to read lazywt.json.");

@@ -7,6 +7,7 @@ namespace App\Actions;
 use function Laravel\Prompts\select;
 use App\GitService;
 use App\Config;
+use App\Helpers;
 
 class Change
 {
@@ -14,7 +15,7 @@ class Change
 
   public static function run(): void
   {
-    $git_root = Config::get(key: 'git_folder');
+    $git_root = Helpers::findGitFolder();
 
     $worktrees = GitService::getWorktrees(git_path: $git_root);
 

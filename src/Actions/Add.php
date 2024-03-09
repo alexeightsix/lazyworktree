@@ -9,7 +9,6 @@ use function Laravel\Prompts\text;
 use function Laravel\Prompts\search;
 use App\GitService;
 use App\Helpers;
-use App\Config;
 use App\Worktree;
 
 class Add
@@ -82,7 +81,7 @@ class Add
       no: 'Create from existing branch'
     );
 
-    $git_root = Config::get(key: 'git_folder');
+    $git_root = Helpers::findGitFolder();
 
     if (!$is_new_worktree) {
       self::fromExisting(git_root: $git_root);

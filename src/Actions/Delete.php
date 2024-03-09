@@ -9,6 +9,7 @@ use function Laravel\Prompts\info;
 
 use App\Config;
 use App\GitService;
+use App\Helpers;
 
 class Delete
 {
@@ -16,7 +17,8 @@ class Delete
 
   public static function run(): void
   {
-    $git_root = Config::get('git_folder');
+    $git_root = Helpers::findGitFolder();
+
     $worktrees = GitService::getWorktrees(git_path: $git_root);
 
     if ($worktrees->isEmpty()) {

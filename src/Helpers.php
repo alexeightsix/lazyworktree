@@ -7,6 +7,58 @@ namespace App;
 class Helpers
 {
 
+  public static function getRoot(): string
+  {
+    $root = file_exists(getcwd() . '/lazywt.json');
+
+    if ($root) {
+      return getcwd();
+    }
+
+    $child = file_exists('../../lazywt.json');
+
+    if ($child) {
+      return getcwd() . '/../../';
+    }
+
+    $is_in_worktrees = basename(getcwd());
+
+    if ($is_in_worktrees === 'worktrees') {
+      $root = getcwd() . '/../lazywt.json';
+      if (file_exists($root)) {
+        return getcwd() . '/..';
+      }
+    }
+
+    throw new \Exception('Unable to locate lazywt.json');
+  }
+
+  public static function findGitFolder(): string
+  {
+    try {
+      $cwd = self::getRoot();
+      $config = $cwd . '/lazywt.json';
+
+      $contents = file_get_contents($config);
+
+      $config = json_decode(
+        json: $contents,
+        associative: true,
+        flags: JSON_THROW_ON_ERROR
+      );
+
+      $valid = file_exists($cwd . '/' . $config['git_folder'] . '/config');
+
+      if (!$valid) {
+        throw new \Exception('Invalid git folder');
+      }
+
+      return $cwd . '/' . $config['git_folder'];
+    } catch (\Exception) {
+      throw new \Exception('Unable to locate git folder');
+    }
+  }
+
   public static function shell_exec(string $command): array
   {
     $exit_code = -1;
