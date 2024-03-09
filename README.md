@@ -45,6 +45,9 @@ lazyworktree list
 lazyworktree switch
 ```
 
+### Current Symlink
+A ```current``` folder will be created in the root directory of your project linking to the active worktree. This is useful when your project is setup with Docker and volume mounts.
+
 ### IDE Integration
 If you're creating a plugin for your IDE you can use the following commands to interact with the TUI
 ``` bash
