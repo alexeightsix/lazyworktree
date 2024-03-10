@@ -78,18 +78,6 @@ end)
 ```lua 
 local M = {}
 
-M.is_worktree = function()
-  if vim.fn.filereadable(vim.fn.getcwd() .. "/../../lazywt.json") == 1 then
-    return true
-  end
-
-  if vim.fn.filereadable(vim.fn.getcwd() .. "/lazywt.json") == 1 then
-    return true
-  end
-
-  return false
-end
-
 M.exec = function(cmd)
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
@@ -122,12 +110,6 @@ M.can_execute = function()
     vim.notify("Lazy Worktree is not installed")
     return nil
   end
-
-  if not M.is_worktree() then
-    vim.notify("Not a worktree")
-    return nil
-  end
-
   return true
 end
 
@@ -140,11 +122,10 @@ end
 M.load_telescope = function()
   local action_state = require "telescope.actions.state"
   local actions = require "telescope.actions"
-  local conf = require("telescope.config").values
   local dropdown = require("telescope.themes").get_dropdown {}
   local finders = require "telescope.finders"
   local pickers = require "telescope.pickers"
-  return action_state, actions, conf, dropdown, finders, pickers
+  return action_state, actions, dropdown, finders, pickers
 end
 
 M.switch = function()
@@ -152,7 +133,7 @@ M.switch = function()
     return
   end
 
-  action_state, actions, conf, dropdown, finders, pickers = M.load_telescope()
+  local action_state, actions, dropdown, finders, pickers = M.load_telescope()
 
   pickers.new(dropdown, {
     prompt_title = "Switch to Worktree",
