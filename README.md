@@ -78,7 +78,7 @@ end)
 ```lua 
 local M = {}
 
-M.exec = function(cmd)
+M.exec_get_string = function(cmd)
   local f = assert(io.popen(cmd, 'r'))
   local s = assert(f:read('*a'))
   f:close()
@@ -88,13 +88,29 @@ M.exec = function(cmd)
   return s
 end
 
+M.is_success = function(cmd)
+  local _, code, _ = os.execute(cmd .. " > /dev/null 2>&1")
+  return code == 0
+end
+
 M.checkhealth = function()
-  local ok = os.execute("which lazyworktree > /dev/null 2>&1")
-  return ok
+  local binary = false
+  local health = false
+  local ok = M.is_success("which lazyworktree")
+  if ok then
+    binary = true
+  end
+
+  local health = M.is_success("lazyworktree api health")
+
+  if health then
+    health = true
+  end
+  return binary, health
 end
 
 M.list_worktrees = function()
-  local res = M.exec("lazyworktree api list")
+  local res = M.exec_get_string("lazyworktree api list")
   local json = vim.fn.json_decode(res)
   local worktrees = {}
 
@@ -105,16 +121,8 @@ M.list_worktrees = function()
   return worktrees
 end
 
-M.can_execute = function()
-  if not M.checkhealth() then
-    vim.notify("Lazy Worktree is not installed")
-    return nil
-  end
-  return true
-end
-
 M.api_switch = function(worktree)
-  M.exec("lazyworktree api switch" .. " " .. worktree.value.path)
+  M.exec_get_string("lazyworktree api switch" .. " " .. worktree.value.path)
   vim.api.nvim_set_current_dir(worktree.value.path)
   vim.notify("Switched to " .. worktree.value.baseName)
 end
@@ -129,7 +137,15 @@ M.load_telescope = function()
 end
 
 M.switch = function()
-  if not M.can_execute() then
+  local binary, is_worktree = M.checkhealth()
+
+  if not binary then
+    vim.notify("lazyworktree binary not found")
+    return
+  end
+
+  if not is_worktree then
+    vim.notify("lazyworktree api not found")
     return
   end
 
