@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Config;
-
 use App\Actions\Add;
 use App\Actions\Change;
 use App\Actions\Delete;
@@ -88,7 +86,7 @@ class CLIApplication
     try {
       Helpers::getRoot();
       $initalized = true;
-    } catch (\Exception $e) {
+    } catch (Exception) {
     }
 
     $init = $this->hasOption(self::OPT_INIT);
@@ -150,8 +148,6 @@ class CLIApplication
     $this->registerMenuItem(Change::class);
     $this->registerMenuItem(Delete::class);
     $this->registerMenuItem(Quit::class);
-
-
 
     $option = select(label: 'Select Action', options: $this->menuItems);
 

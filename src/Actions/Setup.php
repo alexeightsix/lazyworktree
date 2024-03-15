@@ -40,7 +40,6 @@ class Setup
     $myfile = fopen(getcwd() . '/lazywt.json', "w");
 
     $contents = [
-      'created_at' => date('Y-m-d H:i:s'),
       'git_folder' => $folder,
       'git_repo' => $git_repo
     ];

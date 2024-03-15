@@ -35,16 +35,28 @@ class Add
 
     if ($worktree) {
       $switch = confirm(
-        label: 'Branch already exists, do you want to switch to it?',
+        label: 'Worktree already exists, do you want to switch to it?',
         default: true
       );
 
       if ($switch) {
         Link::run($worktree);
       }
+      return;
     }
 
     GitService::addWorktree(git_root: $git_root, branch: $branch);
+
+    $switch = confirm(
+      label: 'Switch to this Worktree?',
+      default: true
+    );
+
+    if ($switch) {
+      $worktrees = GitService::getWorktrees(git_path: $git_root);
+      $worktree = $worktrees->where('baseName', $branch);
+      Link::run($worktree);
+    }
   }
 
   public static function fromNew(string $git_root): void

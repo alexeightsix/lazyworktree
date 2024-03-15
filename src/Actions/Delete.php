@@ -47,5 +47,15 @@ class Delete
     ProcessHook::run(ProcessHook::HOOK_AFTER_DELETE_GLOBAL, $path);
 
     info("Worktree $options[$path] [{$path}] deleted");
+
+    $worktrees = GitService::getWorktrees($git_root);
+
+    if (!$worktrees->isEmpty()) {
+      return;
+    }
+
+    if (is_link($git_root . "/../current")) {
+      unlink($git_root . "/../current");
+    }
   }
 }

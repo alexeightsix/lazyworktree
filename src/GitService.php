@@ -10,7 +10,7 @@ class GitService
 {
   public static function repoExists(string $url): bool
   {
-    $command = "git ls-remote {$url}";
+    $command = "git ls-remote {$url} > /dev/null 2>&1";
     [$ok] = Helpers::shell_exec($command);
     return $ok;
   }
