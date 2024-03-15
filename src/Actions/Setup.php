@@ -15,6 +15,7 @@ class Setup
   {
     $git_repo = text(
       label: 'Git Repository URL',
+      default: 'https://github.com/alexeightsix/nvim-config.git',
       placeholder: 'https://github.com/laravel/framework.git',
       hint: 'The URL of the git repository to clone.',
       validate: fn (string $value) => match (true) {
