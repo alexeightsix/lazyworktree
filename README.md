@@ -89,7 +89,7 @@ M.exec_get_string = function(cmd)
 end
 
 M.is_success = function(cmd)
-  local _, code, _ = os.execute(cmd .. " > /dev/null 2>&1")
+  local code = os.execute(cmd .. " > /dev/null 2>&1")
   return code == 0
 end
 
