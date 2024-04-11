@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\GitService;
+use App\Helpers;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\text;
 
 class Setup
 {
-  public static function run(): void
+  public static function run(): int
   {
     $git_repo = text(
       label: 'Git Repository URL',
-      default: 'https://github.com/alexeightsix/nvim-config.git',
+      default: Helpers::get_repo_from_clipboard_if_exists() ?? '',
       placeholder: 'https://github.com/laravel/framework.git',
       hint: 'The URL of the git repository to clone.',
       validate: fn (string $value) => match (true) {
@@ -26,14 +27,14 @@ class Setup
 
     if (!GitService::repoExists($git_repo)) {
       error('The repository does not exist.');
-      exit(1);
+      return 1;
     }
 
     $folder = "git";
 
     if (is_dir($folder)) {
       error("The folder {$folder} already exists.");
-      exit(1);
+      return 1;
     }
 
     GitService::bareClone($git_repo, $folder);
@@ -53,5 +54,7 @@ class Setup
 
     fwrite($myfile, (string) $json);
     fclose($myfile);
+
+    return 0;
   }
 }

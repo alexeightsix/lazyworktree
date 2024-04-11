@@ -6,6 +6,33 @@ namespace App;
 
 class Helpers
 {
+  public static function get_repo_from_clipboard_if_exists(): ?string
+  {
+    [$ok] = self::shell_exec(command: "which timeout && which xclip > /dev/null 2>&1");
+
+    if (!$ok) {
+      return null;
+    }
+
+    [$ok, $output] = self::shell_exec(command: "xclip -o");
+
+    if (!$ok || empty($output)) {
+      return null;
+    }
+
+    $output = trim($output[0]);
+    $output = str_replace("\n", "", $output);
+
+    preg_match("/[a-zA-Z0-9_]+@(.*).git/", $output, $matches);
+
+    if (empty($matches)) {
+      return null;
+    }
+
+    [$ok, $output] = self::shell_exec(command: "timeout 2 git ls-remote {$matches[0]}");
+
+    return $ok ? $matches[0] : null;
+  }
 
   public static function getRoot(): string
   {

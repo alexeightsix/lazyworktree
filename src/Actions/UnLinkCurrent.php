@@ -6,9 +6,9 @@ namespace App\Actions;
 
 class UnLinkCurrent
 {
-  public static function run(): void
+  public static function run(string $link): void
   {
-    if (!unlink(getcwd() . '/current')) {
+    if (!unlink($link . 'current')) {
       throw new \Exception('Could not remove old symlink');
     }
   }

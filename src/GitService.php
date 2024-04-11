@@ -31,7 +31,7 @@ class GitService
     }
   }
 
-  public static function addWorktree(string $git_root, string $branch, bool $newBranch = false): bool
+  public static function addWorktree(string $git_root, string $branch, bool $newBranch = false): void
   {
     if ($newBranch) {
       $args = "-b {$branch}";
@@ -39,8 +39,8 @@ class GitService
       $args = $branch;
     }
 
-    if (!is_dir("{$git_root}/../worktrees")) {
-      mkdir("{$git_root}/../worktrees");
+    if (!is_dir("{$git_root}/../worktrees") && !mkdir("{$git_root}/../worktrees")) {
+      throw new GitOperationException("Failed to create worktrees directory.");
     }
 
     $slug = Helpers::slugify($branch);
@@ -52,8 +52,6 @@ class GitService
     if (!$ok) {
       throw new GitOperationException("Failed to add worktree.");
     }
-
-    return true;
   }
 
   public static function getBranches(string $path): array

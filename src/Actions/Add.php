@@ -24,11 +24,16 @@ class Add
       fn (string $input) => array_filter($branches, fn ($branch) => str_contains($branch, $input))
     );
 
-    if (!array_key_exists($branch, $branches)) {
-      throw new \Exception("Branch not found.");
+    foreach ($branches as $value) {
+      if ($value == $branch) {
+        $found = true;
+        break;
+      }
     }
 
-    $branch = $branches[$branch];
+    if (!isset($found)) {
+      throw new \Exception("Branch not found.");
+    }
 
     $worktrees = GitService::getWorktrees(git_path: $git_root);
     $worktree = $worktrees->where('baseName', $branch);
@@ -53,6 +58,7 @@ class Add
     );
 
     if ($switch) {
+      $branch = Helpers::slugify($branch);
       $worktrees = GitService::getWorktrees(git_path: $git_root);
       $worktree = $worktrees->where('baseName', $branch);
       Link::run($worktree);

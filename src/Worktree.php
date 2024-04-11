@@ -56,7 +56,6 @@ class Worktree
 
   public function __set(string $name, mixed $value): void
   {
-
     throw new \Exception("Cannot set value of {$name}");
   }
 

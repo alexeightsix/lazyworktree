@@ -8,20 +8,21 @@ use function Laravel\Prompts\info;
 use function Laravel\Prompts\warning;
 
 use App\Actions\ProcessHook;
-
+use App\Helpers;
 use App\Worktree;
 
 class Link
 {
   public static function run(Worktree $worktree): void
   {
-    $cwd = getcwd();
+
+    $cwd = Helpers::getRoot();
 
     if (!$cwd) {
       throw new \Exception('Could not get current working directory');
     }
 
-    $current = $cwd . '/current';
+    $current = $cwd . 'current';
 
     if (!isset($worktree->path)) {
       throw new \Exception('No worktree found');
@@ -32,7 +33,7 @@ class Link
 
     if (is_link(filename: $current)) {
       warning(message: 'Removing old symlink: ' . readlink($current));
-      UnLinkCurrent::run();
+      UnLinkCurrent::run(link: $cwd);
     }
 
     if (!symlink(target: $worktree->path, link: $current)) {

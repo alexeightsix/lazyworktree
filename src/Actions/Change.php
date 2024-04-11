@@ -6,7 +6,6 @@ namespace App\Actions;
 
 use function Laravel\Prompts\select;
 use App\GitService;
-use App\Config;
 use App\Helpers;
 
 class Change
@@ -34,7 +33,7 @@ class Change
       options: $options
     );
 
-    $worktree = $worktrees->where('path', $path);
+    $worktree = $worktrees->where(key: 'path', value: $path);
 
     if (!$worktree) {
       throw new \Exception("No worktrees found.");
