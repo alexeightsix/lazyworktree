@@ -24,16 +24,7 @@ class Add
       fn (string $input) => array_filter($branches, fn ($branch) => str_contains($branch, $input))
     );
 
-    foreach ($branches as $value) {
-      if ($value == $branch) {
-        $found = true;
-        break;
-      }
-    }
-
-    if (!isset($found)) {
-      throw new \Exception("Branch not found.");
-    }
+    $branch = $branches[$branch];
 
     $worktrees = GitService::getWorktrees(git_path: $git_root);
     $worktree = $worktrees->where('baseName', $branch);
