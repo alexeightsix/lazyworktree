@@ -39,7 +39,7 @@ class Helpers
     $root = file_exists(getcwd() . '/lazywt.json');
 
     if ($root) {
-      return getcwd();
+      return getcwd() . '/';
     }
 
     $child = file_exists('../../lazywt.json');
@@ -53,7 +53,7 @@ class Helpers
     if ($is_in_worktrees === 'worktrees') {
       $root = getcwd() . '/../lazywt.json';
       if (file_exists($root)) {
-        return getcwd() . '/..';
+        return getcwd() . '/../';
       }
     }
 
@@ -99,17 +99,8 @@ class Helpers
   }
   public static function rmDirRecursive(string $dir): bool
   {
-    $files = new \RecursiveIteratorIterator(
-      new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-      \RecursiveIteratorIterator::CHILD_FIRST
-    );
-
-    foreach ($files as $fileinfo) {
-      $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink'); // @phpstan-ignore-line
-      $todo($fileinfo->getRealPath()); // @phpstan-ignore-line
-    }
-
-    return rmdir($dir);
+    exec("rm -r $dir");
+    return true;
   }
 
   public static function slugify(string $string): string | null
