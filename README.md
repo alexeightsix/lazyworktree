@@ -26,6 +26,13 @@ sudo ln -s ~/.local/share/lazyworktree/bin /usr/local/bin/lazyworktree
 export lw='lazyworktree'
 ```
 
+### Fetching from remote (todo: add more context)
+```
+  [remote "origin"]
+	url = xxxx
+  fetch = +refs/heads/*:refs/remotes/origin/*
+```
+
 #### Usage
 ``` bash
 mkdir /my_repo 
