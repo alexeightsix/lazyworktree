@@ -15,7 +15,6 @@ class Link
 {
   public static function run(Worktree $worktree): void
   {
-
     $cwd = Helpers::getRoot();
 
     if (!$cwd) {
@@ -29,10 +28,9 @@ class Link
     }
 
     ProcessHook::run(hook: ProcessHook::HOOK_BEFORE_CHANGE_LOCAL, cwd: $worktree->path);
-    ProcessHook::run(hook: ProcessHook::HOOK_BEFORE_CHANGE_GLOBAL, cwd: $worktree->path);
+    ProcessHook::run(hook: ProcessHook::HOOK_BEFORE_CHANGE_GLOBAL, cwd: $cwd);
 
     if (is_link(filename: $current)) {
-      warning(message: 'Removing old symlink: ' . readlink($current));
       UnLinkCurrent::run(link: $cwd);
     }
 
@@ -40,7 +38,7 @@ class Link
       throw new \Exception('Could not create symlink');
     }
 
-    info(message: 'Switched to worktree: ' . $worktree->path);
+    info(message: 'Switched To Worktree: ' . basename($worktree->path));
 
     ProcessHook::run(hook: ProcessHook::HOOK_AFTER_CHANGE_LOCAL, cwd: $worktree->path);
     ProcessHook::run(hook: ProcessHook::HOOK_AFTER_CHANGE_GLOBAL, cwd: $cwd);

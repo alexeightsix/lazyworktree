@@ -9,16 +9,16 @@ use function Laravel\Prompts\info;
 
 class ProcessHook
 {
-  const HOOK_BEFORE_CHANGE_LOCAL = 'HOOK_BEFORE_CHANGE_LOCAL';
-  const HOOK_BEFORE_CHANGE_GLOBAL = 'HOOK_BEFORE_CHANGE_GLOBAL';
-  const HOOK_AFTER_CHANGE_LOCAL = 'HOOK_AFTER_CHANGE_LOCAL';
   const HOOK_AFTER_CHANGE_GLOBAL = 'HOOK_AFTER_CHANGE_GLOBAL';
-  const HOOK_BEFORE_DELETE_LOCAL = 'HOOK_BEFORE_DELETE_LOCAL';
-  const HOOK_BEFORE_DELETE_GLOBAL = 'HOOK_BEFORE_DELETE_GLOBAL';
-  const HOOK_AFTER_DELETE_LOCAL = 'HOOK_AFTER_DELETE_LOCAL';
+  const HOOK_AFTER_CHANGE_LOCAL = 'HOOK_AFTER_CHANGE_LOCAL';
   const HOOK_AFTER_DELETE_GLOBAL = 'HOOK_AFTER_DELETE_GLOBAL';
-  const HOOK_BEFORE_ADD_LOCAL = 'HOOK_BEFORE_ADD_LOCAL';
+  const HOOK_AFTER_DELETE_LOCAL = 'HOOK_AFTER_DELETE_LOCAL';
   const HOOK_BEFORE_ADD_GLOBAL = 'HOOK_BEFORE_ADD_GLOBAL';
+  const HOOK_BEFORE_ADD_LOCAL = 'HOOK_BEFORE_ADD_LOCAL';
+  const HOOK_BEFORE_CHANGE_GLOBAL = 'HOOK_BEFORE_CHANGE_GLOBAL';
+  const HOOK_BEFORE_CHANGE_LOCAL = 'HOOK_BEFORE_CHANGE_LOCAL';
+  const HOOK_BEFORE_DELETE_GLOBAL = 'HOOK_BEFORE_DELETE_GLOBAL';
+  const HOOK_BEFORE_DELETE_LOCAL = 'HOOK_BEFORE_DELETE_LOCAL';
 
   public static function run(string $hook, string $cwd): void
   {
@@ -35,9 +35,10 @@ class ProcessHook
       throw new \TypeError("Hook {$hook} is not a string");
     }
 
-    $hook = $cwd . "/" . strtolower(string: $hook_str) . ".sh";
+    $hook = str_replace("//", "/", $cwd . "/" . strtolower(string: $hook_str) . ".sh");
 
     if (!file_exists(filename: $hook)) {
+      warning(message: $hook);
       return;
     }
 
@@ -47,6 +48,6 @@ class ProcessHook
     }
 
     info(message: "Running hook: {$hook}");
-    shell_exec(command: "/usr/bin/env bash {$hook_str}");
+    shell_exec(command: "/usr/bin/env bash {$hook}");
   }
 }
