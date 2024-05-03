@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\warning;
 
 use App\Actions\ProcessHook;
 use App\Helpers;
 use App\Worktree;
+use Exception;
 
 class Link
 {
@@ -35,7 +35,7 @@ class Link
     }
 
     if (!symlink(target: $worktree->path, link: $current)) {
-      throw new \Exception('Could not create symlink');
+      throw new Exception('Could not create symlink');
     }
 
     info(message: 'Switched To Worktree: ' . basename($worktree->path));

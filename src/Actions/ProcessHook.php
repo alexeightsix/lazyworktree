@@ -38,7 +38,6 @@ class ProcessHook
     $hook = str_replace("//", "/", $cwd . "/" . strtolower(string: $hook_str) . ".sh");
 
     if (!file_exists(filename: $hook)) {
-      warning(message: $hook);
       return;
     }
 
