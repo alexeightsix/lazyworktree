@@ -63,7 +63,12 @@ class CLIApplication
 
   private function handleApi(): int
   {
-    $api_action = (string) $this->options[2] ?? null;
+    $api_action = isset($this->options[2]) ? (string) $this->options[2] : null;
+
+    if ($api_action === null) {
+      error('No API action specified.');
+      return 1;
+    }
 
     if (!$this->isValidApiAction($api_action)) {
       error('Invalid API action.');
