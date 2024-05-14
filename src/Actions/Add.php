@@ -24,8 +24,6 @@ class Add
       fn (string $input) => array_filter($branches, fn ($branch) => str_contains($branch, $input))
     );
 
-    $branch = $branches[$branch];
-
     $worktrees = GitService::getWorktrees(git_path: $git_root);
     $worktree = $worktrees->where('baseName', $branch);
 
@@ -92,7 +90,7 @@ class Add
   {
     $is_new_worktree = confirm(
       label: 'Add New Worktree',
-      yes: 'Create new branch',
+      yes: 'Create from new branch',
       no: 'Create from existing branch'
     );
 
