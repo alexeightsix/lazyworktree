@@ -24,6 +24,11 @@ class Add
       fn (string $input) => array_filter($branches, fn ($branch) => str_contains($branch, $input))
     );
 
+    // FIX ME
+    // this works on existing projects 
+    // but new projects fail here for some reason...
+    $branch = $branches[$branch];
+
     $worktrees = GitService::getWorktrees(git_path: $git_root);
     $worktree = $worktrees->where('baseName', $branch);
 
